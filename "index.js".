@@ -1,0 +1,35 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const twilio = require('twilio');
+
+const app = express();
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.post('/whatsapp', (req, res) => {
+  const message = req.body.Body.toLowerCase(); // Mensaje recibido
+  let reply = '';
+
+  if (message.includes('shake') || message.includes('batido')) {
+    reply = 'El Shake Fórmula 1 es un batido rico con proteínas para estar fuerte. Precio: unos 148.000 pesos. Sabores: vainilla, chocolate, fresa. ¿Más info?';
+  } else if (message.includes('té') || message.includes('te')) {
+    reply = 'El Té Herbal da energía como un superhéroe. Sabores: limón, frambuesa. Precio: unos 92.500 pesos. ¿Cómo se hace?';
+  } else if (message.includes('precios') || message.includes('precio')) {
+    reply = 'Precios divertidos: Shake 148.000 pesos, Té 92.500 pesos, Vitaminas 111.000 pesos. ¿Cuál quieres saber?';
+  } else if (message.includes('hola') || message.includes('ayuda')) {
+    reply = '¡Hola amiguito! Soy el robot de Herbalife. Pregúntame de batidos, tés o precios.';
+  } else {
+    reply = 'No entendí, ¡prueba preguntando de batidos o precios!';
+  }
+
+  const client = new twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+  client.messages.create({
+    from: 'whatsapp:+14155238886',
+    body: reply,
+    to: req.body.From
+  });
+
+  res.sendStatus(200);
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Robot listo en puerto ${port}`));
